@@ -1,0 +1,13 @@
+Semana,Fase,Tarea,Estado,Duración (horas)
+1,Backend,EDA y limpieza de datos,📌 Por iniciar,8
+1,Backend,Feature Engineering,📌 Por iniciar,6
+1,Backend,Entrenamiento de modelos,📌 Por iniciar,8
+2,Testing,Unit Tests,📌 Por iniciar,6
+2,Backend,Modelos individuales,📌 Por iniciar,12
+2,Backend,Model Manager,📌 Por iniciar,4
+3,Frontend,Auth System,📌 Por iniciar,8
+3,Frontend,Streamlit Pages,📌 Por iniciar,16
+4,Frontend,Batch Upload,📌 Por iniciar,6
+4,Integration,Database Integration,📌 Por iniciar,4
+5,Integration,Bug Fixes,📌 Por iniciar,4
+6,Deployment,Production Deploy,📌 Por iniciar,4
