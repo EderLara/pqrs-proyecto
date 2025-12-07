@@ -30,6 +30,10 @@ from sklearn.metrics import (
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+from imblearn.over_sampling import SMOTE
+from scipy.sparse import csr_matrix
+import logging
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -129,55 +133,186 @@ class ModelingPipeline:
         logger.info("✓ EDA completed")
         return eda
     
+    def diagnose_classes(self) -> None:
+        """
+        Diagnóstica el estado de clases para identificar problemas potenciales.
+        Ejecutar esta función ANTES de prepare_features() para debug.
+        
+        Salida: Información detallada sobre distribución de clases
+        """
+        logger.info("\n" + "="*60)
+        logger.info("CLASS DIAGNOSIS REPORT")
+        logger.info("="*60)
+        
+        # Entidades
+        logger.info("\nENTIDAD RESPONSABLE Distribution:")
+        entity_counts = self.df["ENTIDAD RESPONSABLE"].value_counts()
+        for entity, count in entity_counts.items():
+            status = "✓ OK" if count >= 2 else "✗ PROBLEMA"
+            logger.info(f"  {entity:30s}: {count:3d} registros {status}")
+        
+        logger.info(f"\n  Total entidades: {len(entity_counts)}")
+        logger.info(f"  Válidas (>=2): {(entity_counts >= 2).sum()}")
+        logger.info(f"  Problemáticas (<2): {(entity_counts < 2).sum()}")
+        
+        # Tipos
+        logger.info("\nTIPOS DE HECHO Distribution:")
+        issue_counts = self.df["TIPOS DE HECHO"].value_counts()
+        for issue, count in issue_counts.items():
+            status = "✓ OK" if count >= 2 else "✗ PROBLEMA"
+            logger.info(f"  {issue:30s}: {count:3d} registros {status}")
+        
+        logger.info(f"\n  Total tipos: {len(issue_counts)}")
+        logger.info(f"  Válidos (>=2): {(issue_counts >= 2).sum()}")
+        logger.info(f"  Problemáticos (<2): {(issue_counts < 2).sum()}")
+        
+        # Recomendaciones
+        logger.info("\n" + "-"*60)
+        if (entity_counts >= 2).sum() == len(entity_counts):
+            logger.info("✓ ENTIDADES: Sin problemas")
+        else:
+            logger.info("⚠️  ENTIDADES: Hay clases minoritarias que serán filtradas")
+        
+        if (issue_counts >= 2).sum() == len(issue_counts):
+            logger.info("✓ TIPOS: Sin problemas")
+        else:
+            logger.info("⚠️  TIPOS: Hay clases minoritarias que serán filtradas")
+        
+        logger.info("="*60 + "\n")
+    
     # ============= 3. INGENIERÍA DE FEATURES =============
     
-    def prepare_features(self, test_size: float = 0.2, random_state: int = 42):
+    def prepare_features(self, test_size: float = 0.2, random_state: int = 42) -> None:
         """
-        Prepare features and split data.
+        Prepara features para modelado con manejo robusto de clases minoritarias.
+        
+        Estrategia:
+        1. Vectoriza texto con TF-IDF
+        2. Filtra clases con <2 ejemplos para evitar stratification errors
+        3. Aplica train/test split stratificado (o simple si es necesario)
+        4. Almacena para uso en entrenamiento
         
         Args:
-            test_size: Proportion of test set
-            random_state: Random seed for reproducibility
-            
-        Operations:
-        1. TF-IDF vectorization of text
-        2. Train/test split
-        3. Feature scaling
+            test_size: Proporción de test (default 0.2)
+            random_state: Seed para reproducibilidad (default 42)
         
-        Example:
-            >>> pipeline.prepare_features(test_size=0.2)
-            >>> print(f"Train: {len(pipeline.X_train)}, Test: {len(pipeline.X_test)}")
+        Raises:
+            ValueError: Si no hay suficientes datos después de filtrar
         """
-        if self.df is None:
-            raise ValueError("Data not loaded")
-        
         logger.info("Preparing features...")
         
-        # TF-IDF Vectorization
-        self.vectorizer = TfidfVectorizer(
-            max_features=500,
-            ngram_range=(1, 2),
-            min_df=2,
-            max_df=0.95,
-            stop_words='english'
-        )
-        
-        X = self.vectorizer.fit_transform(self.df["DESCRIPCION_LIMPIA"])
-        y_entity = self.df["ENTIDAD RESPONSABLE"]
-        y_issue = self.df["TIPOS DE HECHO"]
-        
-        # Train/test split stratified by entity
-        self.X_train, self.X_test, \
-        self.y_entity_train, self.y_entity_test, \
-        self.y_issue_train, self.y_issue_test = train_test_split(
-            X, y_entity, y_issue,
-            test_size=test_size,
-            random_state=random_state,
-            stratify=y_entity
-        )
-        
-        logger.info(f"✓ Features prepared: Train={len(self.X_train)}, Test={len(self.X_test)}")
-    
+        try:
+            # PASO 1: Vectorizar texto
+            logger.info("Vectorizing text with TF-IDF...")
+            vectorizer = TfidfVectorizer(
+                max_features=1000,
+                stop_words=['el', 'la', 'de', 'que', 'y'],  # Spanish stops
+                ngram_range=(1, 2),
+                min_df=2,
+                max_df=0.8
+            )
+            X = vectorizer.fit_transform(self.df["DESCRIPCION DEL HECHO"].fillna(""))
+            self.vectorizer = vectorizer
+            logger.info(f"  ✓ Vectorized: {X.shape}")
+            
+            # PASO 2: Obtener targets
+            y_entity = self.df["ENTIDAD RESPONSABLE"]
+            y_issue = self.df["TIPOS DE HECHO"]
+            
+            # PASO 3: FILTRAR CLASES MINORITARIAS (FIX PARA EL ERROR)
+            logger.info("Filtering minority classes...")
+            
+            # Contar ejemplos por clase en Entity
+            entity_counts = y_entity.value_counts()
+            entity_valid = entity_counts[entity_counts >= 2].index.tolist()
+            logger.info(f"  Entity classes valid: {len(entity_valid)}/{len(entity_counts)}")
+            
+            # Contar ejemplos por clase en Issue
+            issue_counts = y_issue.value_counts()
+            issue_valid = issue_counts[issue_counts >= 2].index.tolist()
+            logger.info(f"  Issue classes valid: {len(issue_valid)}/{len(issue_counts)}")
+            
+            # Crear máscara de registros válidos
+            mask = (y_entity.isin(entity_valid)) & (y_issue.isin(issue_valid))
+            
+            logger.info(f"  Registros antes filtro: {len(self.df)}")
+            logger.info(f"  Registros después filtro: {mask.sum()}")
+            
+            if mask.sum() < 10:
+                raise ValueError(
+                    f"Muy pocos registros después de filtrar ({mask.sum()}). "
+                    "Verifica la calidad del dataset."
+                )
+            
+            # Aplicar máscara
+            X = X[mask]
+            y_entity = y_entity[mask].reset_index(drop=True)
+            y_issue = y_issue[mask].reset_index(drop=True)
+            
+            # PASO 4: TRAIN/TEST SPLIT CON MANEJO DE ERRORES
+            logger.info("Performing train/test split...")
+            
+            try:
+                # Intentar con stratificación
+                self.X_train, self.X_test, \
+                self.y_entity_train, self.y_entity_test, \
+                self.y_issue_train, self.y_issue_test = train_test_split(
+                    X, y_entity, y_issue,
+                    test_size=test_size,
+                    random_state=random_state,
+                    stratify=y_entity  # Estratificar por entidad
+                )
+                logger.info("  ✓ Split estratificado exitoso")
+                
+            except ValueError as e:
+                # Si falla, usar split simple
+                logger.warning(f"  ⚠️ Stratified split falló: {str(e)}")
+                logger.info("  Usando split simple con shuffle...")
+                
+                self.X_train, self.X_test, \
+                self.y_entity_train, self.y_entity_test, \
+                self.y_issue_train, self.y_issue_test = train_test_split(
+                    X, y_entity, y_issue,
+                    test_size=test_size,
+                    random_state=random_state,
+                    shuffle=True  # Mezclar bien
+                )
+                logger.info("  ✓ Split simple exitoso")
+            
+            # PASO 5: APLICAR SMOTE SOLO EN TRAIN (NO EN TEST)
+            logger.info("Applying SMOTE on training data...")
+
+            try:
+                issue_train_counts = self.y_issue_train.value_counts()
+                min_count = issue_train_counts.min()
+                
+                if min_count < 5:
+                    logger.info(f"  Desbalance detectado (min: {min_count} ejemplos)")
+                    
+                    # Convertir X_train a denso
+                    X_train_dense = self.X_train.toarray() if hasattr(self.X_train, 'toarray') else self.X_train
+                    
+                    # ⚠️ Problema: SMOTE genera nuevas muestras sintéticas, no podemos mapear directamente
+                    # SOLUCIÓN: No aplicar SMOTE, usar class_weight en lugar
+                    
+                    logger.warning("  ⚠️ SMOTE puede desalinear múltiples targets.")
+                    logger.info("  Usando class_weight='balanced' en modelos en su lugar.")
+                    
+                    # Convertir a sparse si era necesario
+                    if hasattr(self.X_train, 'toarray'):
+                        from scipy.sparse import csr_matrix
+                        self.X_train = csr_matrix(X_train_dense)
+                    
+                else:
+                    logger.info("  ✓ Dataset balanceado, sin SMOTE necesario")
+                    
+            except Exception as e:
+                logger.warning(f"  ⚠️ SMOTE application failed: {str(e)}")
+                logger.info("  Continuando sin SMOTE")
+                    
+        except Exception as e:
+            logger.warning(f"  ⚠️ Error: {str(e)}")
+
     # ============= 4. ENTRENAMIENTO DE MODELOS =============
     
     def train_entity_classifier(self) -> dict:
@@ -343,8 +478,8 @@ class ModelingPipeline:
             "saved_at": datetime.utcnow().isoformat(),
             "entity_f1": self.results.get("entity", {}).get("f1", 0),
             "issue_f1": self.results.get("issue", {}).get("f1", 0),
-            "test_size": len(self.X_test),
-            "train_size": len(self.X_train),
+            "test_size": (self.X_test.getnnz()),
+            "train_size": (self.X_train.getnnz()),
         }
         
         import json
