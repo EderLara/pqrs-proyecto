@@ -1,0 +1,5 @@
+Componente,Viabilidad,Complejidad,Volumen Datos,Estado
+Clasificación Entidad Responsable,ALTA,Baja,n=150+,✓ Listo
+Clasificación Tipo Hecho,ALTA,Baja,n=150+,✓ Listo
+Análisis Sentimientos,MEDIA-ALTA,Alta,n=150+ descripciones,~ Requiere ajustes
+Cálculo Severidad,ALTA,Media,n=150+,✓ Listo
