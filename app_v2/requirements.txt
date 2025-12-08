@@ -1,0 +1,47 @@
+# requirements_improved.txt
+# Dependencias actualizadas para PQRS Classifier Mejorado
+
+# Análisis de Datos
+pandas==1.5.3
+numpy==1.24.0
+scipy==1.10.0
+
+# Machine Learning
+scikit-learn==1.2.1
+joblib==1.2.0
+
+# Web Framework
+streamlit==1.19.0
+
+# Visualizaciones Avanzadas
+plotly==5.13.0
+plotly-express==0.4.1
+seaborn==0.12.2
+matplotlib==3.7.0
+
+# Análisis de Sentimientos
+textblob==0.17.1
+vaderSentiment==3.3.2
+
+# Seguridad
+bcrypt==4.0.1
+python-dotenv==0.21.0
+
+# Testing
+pytest==7.2.0
+pytest-cov==4.0.0
+
+# Validación
+pydantic==1.10.2
+
+# Base de Datos
+sqlalchemy==2.0.0
+
+# Logging
+python-json-logger==2.0.4
+
+# Análisis de Datos Avanzado
+ydata-profiling==4.5.0
+
+# Utilidades
+tqdm==4.65.0
