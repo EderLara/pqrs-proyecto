@@ -89,7 +89,7 @@ def login_page():
             username = st.text_input("Usuario", key="login_user")
             password = st.text_input("Contraseña", type="password", key="login_pass")
             
-            if st.button("🔓 Entrar", use_container_width=True):
+            if st.button("🔓 Entrar", width='stretch'):
                 if st.session_state.auth.login(username, password):
                     st.session_state.authenticated = True
                     st.session_state.username = username
@@ -102,7 +102,7 @@ def login_page():
             new_pass = st.text_input("Nueva Contraseña", type="password", key="reg_pass")
             confirm_pass = st.text_input("Confirmar Contraseña", type="password", key="reg_pass_conf")
             
-            if st.button("📝 Crear Cuenta", use_container_width=True):
+            if st.button("📝 Crear Cuenta", width='stretch'):
                 if new_pass != confirm_pass:
                     st.error("Las contraseñas no coinciden")
                 elif len(new_pass) < 6:
@@ -116,7 +116,7 @@ def main_app():
     """Aplicación principal."""
     st.sidebar.title(f"👤 {st.session_state.username}")
     
-    if st.sidebar.button("🚪 Cerrar Sesión", use_container_width=True):
+    if st.sidebar.button("🚪 Cerrar Sesión", width='stretch'):
         st.session_state.authenticated = False
         st.rerun()
     
@@ -158,9 +158,9 @@ def main_app():
             col3.metric("Tamaño (MB)", round(df.memory_usage(deep=True).sum() / 1024**2, 2))
             
             st.subheader("📋 Vista previa de datos crudos")
-            st.dataframe(df.head(10), use_container_width=True)
+            st.dataframe(df.head(10), width='stretch')
             
-            if st.button("🧹 Limpiar Datos", use_container_width=True):
+            if st.button("🧹 Limpiar Datos", width='stretch'):
                 df_clean = data_pipeline.clean_data(df)
                 st.session_state.df_clean = df_clean
                 
@@ -171,7 +171,7 @@ def main_app():
                 col4.metric("Duplicados", df_clean.duplicated().sum())
                 
                 st.success("✅ Datos limpiados exitosamente")
-                st.dataframe(df_clean.head(10), use_container_width=True)
+                st.dataframe(df_clean.head(10), width='stretch')
     
     # === PESTAÑA 2: DASHBOARD DE CALIDAD ===
     with tabs[1]:
@@ -213,7 +213,7 @@ def main_app():
             # Gráfico comparativo
             st.subheader("📉 Comparación Antes/Después")
             fig_comparison = EnhancedVisualizer.plot_data_quality_before_after(df_raw, df_clean)
-            st.plotly_chart(fig_comparison, use_container_width=True)
+            st.plotly_chart(fig_comparison, width='stretch')
             
             # Tabla detallada
             st.subheader("📋 Detalles de Calidad")
@@ -240,7 +240,7 @@ def main_app():
             }
             
             df_quality = pd.DataFrame(quality_data)
-            st.dataframe(df_quality, use_container_width=True, hide_index=True)
+            st.dataframe(df_quality, width='stretch', hide_index=True)
             
         else:
             st.info("⚠️ Cargue y limpie los datos primero en la pestaña anterior.")
@@ -272,7 +272,7 @@ def main_app():
                     EnhancedVisualizer.plot_distribution_bar(
                         df, 'ENTIDAD RESPONSABLE', 'Distribución de Entidades'
                     ),
-                    use_container_width=True
+                    width='stretch'
                 )
             
             if "🥧 Distribución Entidades (Pastel)" in viz_options:
@@ -280,7 +280,7 @@ def main_app():
                     EnhancedVisualizer.plot_distribution_pie(
                         df, 'ENTIDAD RESPONSABLE', 'Entidades Responsables'
                     ),
-                    use_container_width=True
+                    width='stretch'
                 )
             
             if "📊 Distribución Tipos de Hecho (Barras)" in viz_options:
@@ -288,7 +288,7 @@ def main_app():
                     EnhancedVisualizer.plot_distribution_bar(
                         df, 'TIPOS DE HECHO', 'Distribución de Tipos de Hecho'
                     ),
-                    use_container_width=True
+                    width='stretch'
                 )
             
             if "🥧 Distribución Tipos de Hecho (Pastel)" in viz_options:
@@ -296,7 +296,7 @@ def main_app():
                     EnhancedVisualizer.plot_distribution_pie(
                         df, 'TIPOS DE HECHO', 'Tipos de Hecho'
                     ),
-                    use_container_width=True
+                    width='stretch'
                 )
             
             if "📏 Longitud de Texto" in viz_options:
@@ -304,14 +304,14 @@ def main_app():
                     EnhancedVisualizer.plot_text_length_distribution(
                         df, 'DESCRIPCION_LIMPIA'
                     ),
-                    use_container_width=True
+                    width='stretch'
                 )
             
             if "🔤 Palabras Más Frecuentes" in viz_options:
                 top_n = st.slider("Número de palabras a mostrar", 10, 50, 20)
                 st.plotly_chart(
                     EnhancedVisualizer.plot_top_words(df, 'DESCRIPCION_LIMPIA', top_n),
-                    use_container_width=True
+                    width='stretch'
                 )
             
             if "🔥 Correlación Entidad vs Hecho" in viz_options:
@@ -319,7 +319,7 @@ def main_app():
                     EnhancedVisualizer.plot_correlation_heatmap(
                         df, 'ENTIDAD RESPONSABLE', 'TIPOS DE HECHO'
                     ),
-                    use_container_width=True
+                    width='stretch'
                 )
         else:
             st.warning("⚠️ Por favor cargue y limpie los datos primero.")
@@ -350,7 +350,7 @@ def main_app():
             )
         
         with col2:
-            train_btn = st.button("🚀 Entrenar", use_container_width=True, key="train_btn")
+            train_btn = st.button("🚀 Entrenar", width='stretch', key="train_btn")
         
         with col3:
             st.info(f"📊 Datos: {len(st.session_state.df_clean)} registros")
@@ -466,7 +466,7 @@ def main_app():
                             metrics['labels_entity'],
                             "Entity Classifier"
                         )
-                        st.pyplot(fig_cm, use_container_width=True)
+                        st.pyplot(fig_cm, width='stretch')
                     
                     # Expandible: Detalles por clase
                     with st.expander("📋 Detalles por clase"):
@@ -476,7 +476,7 @@ def main_app():
                         
                         st.dataframe(
                             entity_detail.style.format("{:.2%}"),
-                            use_container_width=True
+                            width='stretch'
                         )
                 
                 # ─── TAB 2: ISSUE CLASSIFIER ───
@@ -505,7 +505,7 @@ def main_app():
                             metrics['labels_issue'],
                             "Issue Classifier"
                         )
-                        st.pyplot(fig_cm, use_container_width=True)
+                        st.pyplot(fig_cm, width='stretch')
                     
                     # Expandible: Detalles por clase
                     with st.expander("📋 Detalles por clase"):
@@ -515,7 +515,7 @@ def main_app():
                         
                         st.dataframe(
                             issue_detail.style.format("{:.2%}"),
-                            use_container_width=True
+                            width='stretch'
                         )
                 
                 # ─────────────────────────────────────────────────────────────
@@ -557,7 +557,7 @@ def main_app():
                         showlegend=False
                     )
                     
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, width='stretch')
                 
                 with col2:
                     # Tabla comparativa
@@ -578,7 +578,7 @@ def main_app():
                     }
                     
                     df_comparison = pd.DataFrame(comparison_data)
-                    st.dataframe(df_comparison, use_container_width=True, hide_index=True)
+                    st.dataframe(df_comparison, width='stretch', hide_index=True)
                 
                 # ─────────────────────────────────────────────────────────────
                 # SECCIÓN 6: INFORMACIÓN Y ACCIONES
@@ -658,7 +658,7 @@ def main_app():
                         placeholder="Escriba aquí la descripción del PQRS..."
                     )
                     
-                    if st.button("🔍 Clasificar y Analizar Sentimiento", use_container_width=True):
+                    if st.button("🔍 Clasificar y Analizar Sentimiento", width='stretch'):
                         if input_text.strip():
                             # Predicción ML
                             result = model_engine.predict(input_text)
@@ -693,7 +693,7 @@ def main_app():
                                 sentiment_result['sentiment_score'],
                                 sentiment_result['confidence']
                             )
-                            st.plotly_chart(fig_sentiment, use_container_width=True)
+                            st.plotly_chart(fig_sentiment, width='stretch')
                             
                             # Detalles de sentimiento
                             col1, col2, col3, col4 = st.columns(4)
@@ -756,7 +756,7 @@ def main_app():
         df_history = st.session_state.db.get_predictions_history(order=sql_order)
         
         if not df_history.empty:
-            st.dataframe(df_history, use_container_width=True)
+            st.dataframe(df_history, width='stretch')
             
             csv = df_history.to_csv(index=False).encode('utf-8')
             st.download_button(
@@ -764,7 +764,7 @@ def main_app():
                 data=csv,
                 file_name=f"reporte_predicciones_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
                 mime="text/csv",
-                use_container_width=True
+                width='stretch'
             )
         else:
             st.info("📭 No hay predicciones en el historial aún.")
