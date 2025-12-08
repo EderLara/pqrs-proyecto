@@ -1,0 +1,66 @@
+# Requisitos del proyecto con una breve descripción de uso
+
+# --- Procesamiento de datos ---
+# pandas: manejo y análisis de datos en estructuras DataFrame
+pandas
+# numpy: operaciones numéricas y arrays multidimensionales
+numpy
+scipy
+
+# --- Machine Learning ---
+# scikit-learn: algoritmos clásicos de ML, pipelines y utilidades
+scikit-learn
+# joblib: serialización y deserialización eficiente de objetos Python
+joblib
+# imbalanced-learn: técnicas de sobremuestreo/submuestreo para datasets desbalanceados
+imbalanced-learn
+# imblearn: alias/sinónimo de imbalanced-learn (si se instala por separado)
+imblearn
+
+# --- Procesamiento de texto ---
+# textblob: utilidades sencillas de NLP (sentimiento, tokenización, lematización)
+textblob
+# vaderSentiment: análisis de sentimientos basado en léxico y reglas
+vaderSentiment
+
+# --- Bases de datos / ORM ---
+# sqlalchemy: toolkit SQL y ORM para conectar y gestionar bases de datos
+sqlalchemy
+
+# --- Interfaz web / Apps ---
+# streamlit: crear interfaces interactivas para apps de datos en pocas líneas
+streamlit
+
+# --- Visualizaciones Avanzadas ---
+# plotly: biblioteca para crear gráficos interactivos y visualizaciones complejas
+plotly
+# plotly-express: interfaz de alto nivel para crear gráficos con Plotly de forma sencilla
+plotly-express
+# seaborn: visualización estadística basada en matplotlib
+seaborn
+# matplotlib: biblioteca para crear gráficos estáticos, animados e interactivos en Python
+matplotlib
+
+# --- Utilidades ---
+# python-dotenv: carga variables de entorno desde un archivo .env
+bcrypt
+python-dotenv
+# pydantic: validación y parsing de datos mediante modelos (útil para configuración/inputs)
+pydantic
+
+# --- Testing ---
+# pytest: framework de testing
+pytest
+# pytest-cov: plugin para generar reportes de coverage de tests
+pytest-cov
+
+# --- Logging ---
+# python-json-logger: formateador de logs en JSON para mejor integración con sistemas de
+python-json-logger==2.0.4
+
+# --- Análisis de Datos Avanzado ---
+# ydata-profiling: generación de reportes exploratorios detallados de datasets
+ydata-profiling==4.5.0
+
+# Utilidades
+tqdm==4.65.0

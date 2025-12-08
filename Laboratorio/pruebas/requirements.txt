@@ -1,0 +1,39 @@
+# Requisitos del proyecto con una breve descripción de uso
+
+# --- Procesamiento de datos ---
+# pandas: manejo y análisis de datos en estructuras DataFrame
+pandas
+# numpy: operaciones numéricas y arrays multidimensionales
+numpy
+
+# --- Machine Learning ---
+# scikit-learn: algoritmos clásicos de ML, pipelines y utilidades
+scikit-learn
+# imbalanced-learn: técnicas de sobremuestreo/submuestreo para datasets desbalanceados
+imbalanced-learn
+# imblearn: alias/sinónimo de imbalanced-learn (si se instala por separado)
+imblearn
+
+# --- Procesamiento de texto ---
+# textblob: utilidades sencillas de NLP (sentimiento, tokenización, lematización)
+textblob
+
+# --- Bases de datos / ORM ---
+# sqlalchemy: toolkit SQL y ORM para conectar y gestionar bases de datos
+sqlalchemy
+
+# --- Interfaz web / Apps ---
+# streamlit: crear interfaces interactivas para apps de datos en pocas líneas
+streamlit
+
+# --- Utilidades ---
+# python-dotenv: carga variables de entorno desde un archivo .env
+python-dotenv
+# pydantic: validación y parsing de datos mediante modelos (útil para configuración/inputs)
+pydantic
+
+# --- Testing ---
+# pytest: framework de testing
+pytest
+# pytest-cov: plugin para generar reportes de coverage de tests
+pytest-cov
